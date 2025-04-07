@@ -5,10 +5,13 @@ import Footer from "../Footer/Footer";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import Button from "../Button/Button";
+import { useSession } from "next-auth/react";
 
 export default function ConnectedLayout({ children }) {
+  // Variable
+  const { data: session } = useSession();
   const pathname = usePathname();
-  console.log(pathname);
+  console.log(session);
 
   return (
     <section className="flex flex-col min-h-screen px-5">
@@ -51,11 +54,23 @@ export default function ConnectedLayout({ children }) {
         <Image src="/logo.png" alt="Threads" width={40} height={40} />
         {/* BOUTON */}
 
-        <Link href="/login" className="z-3">
-          <Button withoutMarginTop className="hover:cursor-pointer">
-            Connexion
-          </Button>
-        </Link>
+        {session?.user?.email ? (
+          <Link href="/login" className="z-3">
+            <Button
+              withoutMarginTop
+              className="hover:cursor-pointer"
+              alertOnClick={() => signOut()}
+            >
+              Se déconnecter
+            </Button>
+          </Link>
+        ) : (
+          <Link href="/login" className="z-3">
+            <Button withoutMarginTop className="hover:cursor-pointer">
+              Se connecter
+            </Button>
+          </Link>
+        )}
       </header>
       {/* CONTENT */}
       <div className="flex-1">{children}</div>

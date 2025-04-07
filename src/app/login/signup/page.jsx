@@ -2,9 +2,14 @@
 
 import { createUser } from "@/actions/create-user";
 import Button from "@/components/Button/Button";
+import { checkEmail } from "@/utils/check-emailsyntax";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
 export default function Signup() {
+  // Variable
+  const router = useRouter();
   //Function
   const prepareCreateUser = async (FormData) => {
     const username = FormData.get("username");
@@ -12,9 +17,29 @@ export default function Signup() {
     const email = FormData.get("email");
     const password = FormData.get("password");
 
-    console.log(username, pseudo, email, password);
+    // If a field is empty
 
-    await createUser(username, pseudo, email, password);
+    if (!username || !pseudo || !email || !password) {
+      //Notification
+      toast.error("Aucun champ ne doit être vide");
+    }
+
+    //Check if emails is valid
+    if (!checkEmail(email)) {
+      return toast.error("Veuillez entrer un email valide !");
+    }
+
+    try {
+      await createUser(username, pseudo, email, password);
+    } catch (error) {
+      return toast.error(error.message);
+    }
+
+    // Success
+    toast.success("Votre compte a bien été créé !");
+
+    // Redirect
+    router.push("/login/signin");
   };
 
   return (
@@ -65,7 +90,7 @@ export default function Signup() {
             className="input"
             required
           />
-          <Button>S'inscrire</Button>
+          <Button formButton>S'inscrire</Button>
         </form>
         <div className="flex justify-center items-center mt-4">
           <div className="border-t border-threads-gray-light w-1/4"></div>

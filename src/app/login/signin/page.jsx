@@ -1,16 +1,51 @@
 "use client";
 
 import Button from "@/components/Button/Button";
+import { checkEmail } from "@/utils/check-emailsyntax";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
+import { signIn } from "next-auth/react";
 
 export default function Signin() {
-  // Function
+  // Variable
+  const router = useRouter();
 
+  // Function
   const prepareLogin = async (formData) => {
     const email = formData.get("email");
     const password = formData.get("password");
 
-    console.log(email, password);
+    // If a field is empty
+    if (!email || !password) {
+      return toast.error("veuillez remplir tous les champs");
+    }
+
+    // Check if emails is valid
+    if (!checkEmail(email)) {
+      return toast.error("Veuillez entrer un email valide");
+    }
+
+    // Signin the user
+    try {
+      const response = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (response.error) {
+        return toast.error(response.error);
+      }
+    } catch (error) {
+      return toast.error(error.message);
+    }
+
+    // Success
+    toast.success("Vous êtes connecté");
+
+    // Redirect
+    router.replace("/");
   };
 
   return (
@@ -47,7 +82,7 @@ export default function Signin() {
             className="input"
             required
           />
-          <Button>Se connecter</Button>
+          <Button formButton>Se connecter</Button>
         </form>
         <div className="flex justify-center items-center mt-4">
           <div className="border-t border-threads-gray-light w-1/4"></div>
